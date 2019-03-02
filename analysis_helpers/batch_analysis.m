@@ -20,9 +20,9 @@ addpath(genpath([mypath 'Katsuhisa/HNlab_meta']))
 addpath(genpath([mypath 'Katsuhisa/code/integrated/matlab_usefulfunc']))
 
 % load list of sessions
-list = listMaker({'kiwi', 'kaki', 'mango'});
-% ses_list = load([mypath 'data/ses_list.mat']);
-% list = ses_list.list;
+% list = listMaker({'kiwi', 'kaki', 'mango'});
+ses_list = load([mypath 'data/ses_list.mat']);
+list = ses_list.list;
 num_animal = length(list);
 
 % batch processing
@@ -68,14 +68,18 @@ exs = cell(1, n_split);
 begin = 1;
 for n = 1:n_split
     ex_temp = ex;
-    ex_temp.Trials = ex.Trials(begin:begin + q - 1);
+    if n == n_split
+        ex_temp.Trials = ex.Trials(begin:end);
+    else
+        ex_temp.Trials = ex.Trials(begin:begin + q - 1);
+    end
     exs{n} = ex_temp;
     begin = begin + q;
 end
 
 function ses_saver(Ldata, mypath)
 slash = strfind(Ldata{1}.dirname, '/');
-fname = [Ldata{1}.dirname(slash(end)+1:end), ...
+fname = [Ldata{1}.filename(1:2) '/' Ldata{1}.dirname(slash(end)+1:end), '.', ...
     Ldata{1}.filename(1:end-4), '_Ldata.mat'];
 save([mypath 'Katsuhisa/learning_project/data/' fname], 'Ldata')
 disp([fname ' saved!'])
