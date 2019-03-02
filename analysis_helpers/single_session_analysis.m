@@ -1,7 +1,10 @@
-function out = single_session_analysis(ex)
+function out = single_session_analysis(ex, sesinfo)
 %%
 % single session analysis in a learning project
 %
+
+% input
+if nargin < 2; sesinfo = 1; end
 
 % white noise correction =========================
 try
@@ -45,43 +48,45 @@ end
 out.fitse = serialchoicebias(behmat, [1 0.025]);
 
 % basic session info =============================
-if isfield(ex,'fileID')
-    ID = ex.fileID(1:3);
-    filename = ex.fileName;
-    if isfield(ex, 'dirName')
-        dirname = ex.dirName;
-    else
-         dirname = [];
-    end
-elseif isfield(ex,'Header')
-    if isfield(ex.Header,'onlineFileName')
-          ID = ex.Header.fileID(1:3);
-        filename = ex.Header.onlineFileName;
-        dirname = ex.Header.onlineDirName;
-    elseif isfield(ex.Header,'Headers')
-        ID =  ex.Header.Headers(1).fileID(1:3);
-        filename = ex.Header.fileName;
-        dirname = ex.Header.Headers(1).onlineDirName;
-    else
-     ID = ex.Header.fileID(1:3);
-     filename = ex.Header.fileName;
-     dirname = ex.Header.dirName;
-    end
-else
-    year = strfind(ex.fileName,'10000');
-    dot = strfind(ex.fileName,'.');
-    ID = strcat(ex.fileName(year:year+3),' ',ex.fileName(dot(1)+1:dot(2)-1),' ',ex.fileName(dot(2)+1:dot(2)+2));
-    filename = ex.fileName;
-    if isfield(ex, 'dirname')
+if sesinfo == 1
+    if isfield(ex,'fileID')
+        ID = ex.fileID(1:3);
+        filename = ex.fileName;
+        if isfield(ex, 'dirName')
             dirname = ex.dirName;
-    else
+        else
              dirname = [];
+        end
+    elseif isfield(ex,'Header')
+        if isfield(ex.Header,'onlineFileName')
+              ID = ex.Header.fileID(1:3);
+            filename = ex.Header.onlineFileName;
+            dirname = ex.Header.onlineDirName;
+        elseif isfield(ex.Header,'Headers')
+            ID =  ex.Header.Headers(1).fileID(1:3);
+            filename = ex.Header.fileName;
+            dirname = ex.Header.Headers(1).onlineDirName;
+        else
+         ID = ex.Header.fileID(1:3);
+         filename = ex.Header.fileName;
+         dirname = ex.Header.dirName;
+        end
+    else
+        year = strfind(ex.fileName,'10000');
+        dot = strfind(ex.fileName,'.');
+        ID = strcat(ex.fileName(year:year+3),' ',ex.fileName(dot(1)+1:dot(2)-1),' ',ex.fileName(dot(2)+1:dot(2)+2));
+        filename = ex.fileName;
+        if isfield(ex, 'dirname')
+                dirname = ex.dirName;
+        else
+                 dirname = [];
+        end
     end
+    out.ID = ID; out.filename = filename; out.dirname = dirname;
+    out.refreshRate = ex.setup.refreshRate;
+    out.stmdur = round(100*size(stmmat, 2)/ex.setup.refreshRate)/100;
+    out.ntr = ntr; out.hdx_range = disval'; out.exp = {ex.exp.e1, ex.exp.e2};
 end
-out.ID = ID; out.filename = filename; out.dirname = dirname;
-out.refreshRate = ex.setup.refreshRate;
-out.stmdur = round(100*size(stmmat, 2)/ex.setup.refreshRate)/100;
-out.ntr = ntr; out.hdx_range = disval'; out.exp = {ex.exp.e1, ex.exp.e2};
 
 function out = run_fit_routine(behmat, eyep, stmseq, disval)
 % analysis as a function of stimulus type
