@@ -92,11 +92,11 @@ function out = run_fit_routine(behmat, eyep, stmseq, disval)
 % analysis as a function of stimulus type
 %
 stm = behmat(:, 5).*behmat(:, 6);
-x = unique(stm);
+x = unique(stm)';
 lenu = length(x);
 y = x;
 n = x;
-out.pupils = cell(2, 2);
+out.pupils = cell(2, 2); % mean and SEM
 for i = 1:lenu
     % behavior
     cond = stm == x(i);
