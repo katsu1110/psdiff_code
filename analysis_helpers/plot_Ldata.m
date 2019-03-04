@@ -36,6 +36,8 @@ xlabel('time bin within session')
 ylabel('PKA')
 set(gca, 'box', 'off', 'tickdir', 'out')
     
+set(gcf, 'Name', 'PK', 'NumberTitle', 'off')
+
 % PM ========================
 figure;
 paramnames = {'bias', 'threshold', 'lapse rate'};
@@ -46,7 +48,7 @@ for i = 1:lenp
         if n == 1
             plot([1 n_split], Ldata{1}.fitpm.params(i)*[1 1], '-', 'color', cols(n, :)) 
         else
-            scatter(n-1, Ldata{1}.fitpm.params(i), 30, 'o', 'markerfacecolor', cols(n, :), ...
+            scatter(n-1, Ldata{n}.fitpm.params(i), 60, 'o', 'markerfacecolor', cols(n, :), ...
                 'markeredgecolor', [1 1 1 ])
         end
         hold on;
@@ -57,6 +59,8 @@ xlabel('time bin within session')
 ylabel(paramnames{i})
 set(gca, 'box', 'off', 'tickdir', 'out')
 end
+
+set(gcf, 'Name', 'PM', 'NumberTitle', 'off')
 
 % serial choice bias =============
 figure;
@@ -68,7 +72,7 @@ for i = 1:lenp
         if n == 1
             plot([1 n_split], Ldata{1}.fitse.beta(i)*[1 1], '-', 'color', cols(n, :)) 
         else
-            scatter(n-1, Ldata{1}.fitse.beta(i), 30, 'o', 'markerfacecolor', cols(n, :), ...
+            scatter(n-1, Ldata{n}.fitse.beta(i), 60, 'o', 'markerfacecolor', cols(n, :), ...
                 'markeredgecolor', [1 1 1 ])
         end
         hold on;
@@ -80,22 +84,30 @@ ylabel(paramnames{i})
 set(gca, 'box', 'off', 'tickdir', 'out')
 end
 
+set(gcf, 'Name', 'choice history bias', 'NumberTitle', 'off')
+
 % PS ========================
 figure;
 paramnames = {'pupil size', 'pupil derivative'};
 lenp = length(paramnames);
-cols = [0.9922    0.6824    0.3804; ...
-    0.6706    0.8510    0.9137];
+cols = [1 0.7 0; ...
+    0    0.7    0];
 t = linspace(0, Ldata{1}.stmdur, size(Ldata{1}.pupils{1, 1}, 2));
 for i = 1:lenp
     subplot(1, lenp, i)
     % easy
     idx = abs(Ldata{1}.fitpm.raw(1, :)) > 0.4;
+    if sum(idx)==0
+        idx = [1, length(Ldata{1}.fitpm.raw(1, :))];
+    end
     plot(t, mean(Ldata{1}.pupils{i, 1}(idx, :), 1), '-', 'color', cols(1, :))
     hold on;
     
     % hard
     idx = abs(Ldata{1}.fitpm.raw(1, :)) > 0 & abs(Ldata{1}.fitpm.raw(1, :)) < 0.15;
+    if sum(idx)==0
+        idx = [floor(length(Ldata{1}.fitpm.raw(1, :))/2), floor(length(Ldata{1}.fitpm.raw(1, :))/2)+2];
+    end
     plot(t, mean(Ldata{1}.pupils{i, 1}(idx, :), 1), '-', 'color', cols(2, :))
     hold on;
     
@@ -108,3 +120,5 @@ for i = 1:lenp
     ylabel(paramnames{i})
     set(gca, 'box', 'off', 'tickdir', 'out')
 end
+
+set(gcf, 'Name', 'pupils', 'NumberTitle', 'off')
