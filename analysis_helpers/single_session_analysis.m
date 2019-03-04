@@ -45,7 +45,7 @@ for a = 1:lena
 end
 
 % serial choice bias =============================
-out.fitse = serialchoicebias(behmat, [1 0.025]);
+out.fitse = serialchoicebias(behmat, [1 0.01]);
 
 % basic session info =============================
 if sesinfo == 1
@@ -91,7 +91,7 @@ end
 function out = run_fit_routine(behmat, eyep, stmseq, disval)
 % analysis as a function of stimulus type
 %
-stm = behmat(:, 5).*behmat(:, 6);
+stm = behmat(:, 5).*sign(behmat(:, 6));
 x = unique(stm)';
 lenu = length(x);
 y = x;
