@@ -31,9 +31,20 @@ stmmat(out, :) = [];
 v = stmmat(:);
 disval = unique(v(~isnan(v)));
 ntr = size(eyep, 1);
-        
+
 % stimlus types =========================
 out = run_fit_routine(behmat, eyep, stmmat, disval);
+
+% store trial matrix =============================
+out.mat = [behmat, zeros(ntr, 2)];
+ncol = size(behmat, 2);
+for n = 1:ntr
+    % pupil size
+    out.mat(n, ncol+1) = nanmax(eyep(n, :)) - nanmin(eyep(n, :));
+    
+    % pupil derivative
+    out.mat(n, ncol+2) = nanmax(diff(eyep(n, :)));
+end
 
 % available reward size ==========================
 avrew = behmat(:, 14);
