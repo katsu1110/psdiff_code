@@ -40,7 +40,9 @@ out.mat = [behmat, zeros(ntr, 2)];
 ncol = size(behmat, 2);
 for n = 1:ntr
     % pupil size
-    out.mat(n, ncol+1) = nanmax(eyep(n, :)) - nanmin(eyep(n, :));
+    [minima, mini] = nanmin(eyep(n, :));
+    maxima = nanmax(eyep(n, mini+1:end));
+    out.mat(n, ncol+1) = maxima - minima;
     
     % pupil derivative
     out.mat(n, ncol+2) = nanmax(diff(eyep(n, :)));

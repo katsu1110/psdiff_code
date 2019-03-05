@@ -92,32 +92,56 @@ paramnames = {'pupil size', 'pupil derivative'};
 lenp = length(paramnames);
 cols = [1 0.7 0; ...
     0    0.7    0];
+pmcols = [0 0 0; 0 0 1; 1 0 0];
 t = linspace(0, Ldata{1}.stmdur, size(Ldata{1}.pupils{1, 1}, 2));
+stm = Ldata{1}.mat(:,5).*sign(Ldata{1}.mat(:,6));
+cor = Ldata{1}.mat(:,9);
 for i = 1:lenp
-    subplot(1, lenp, i)
+    % stimulus types
+    s = Ldata{1}.fitpm.raw(1, :);
+    
+   % time-course =================
+    subplot(2, lenp, i)
     % easy
-    idx = abs(Ldata{1}.fitpm.raw(1, :)) > 0.4;
+    idx = abs(s) > 0.4;
     if sum(idx)==0
-        idx = [1, length(Ldata{1}.fitpm.raw(1, :))];
+        idx = [1, length(s)];
     end
     plot(t, mean(Ldata{1}.pupils{i, 1}(idx, :), 1), '-', 'color', cols(1, :))
     hold on;
     
     % hard
-    idx = abs(Ldata{1}.fitpm.raw(1, :)) > 0 & abs(Ldata{1}.fitpm.raw(1, :)) < 0.15;
+    idx = abs(s) > 0 & abs(s) < 0.15;
     if sum(idx)==0
-        idx = [floor(length(Ldata{1}.fitpm.raw(1, :))/2), floor(length(Ldata{1}.fitpm.raw(1, :))/2)+2];
+        idx = [floor(length(s)/2), floor(length(s)/2)+2];
     end
     plot(t, mean(Ldata{1}.pupils{i, 1}(idx, :), 1), '-', 'color', cols(2, :))
     hold on;
+    
+    % PM-like ==========================
+    subplot(2, lenp, i+2)
+    pmv = nan(3, length(s));
+    for k = 1:length(s)
+        pmv(1, k) = nanmean(Ldata{1}.mat(stm==s(k), 14+i));
+        pmv(2, k) = nanmean(Ldata{1}.mat(stm==s(k) & cor==1, 14+i));
+        pmv(3, k) = nanmean(Ldata{1}.mat(stm==s(k) & cor==0, 14+i));
+    end    
+    for k = 1:3
+        plot(s, pmv(k,:), '-o', 'color', pmcols(k, :))
+        hold on;
+    end
     
 %     for n = 1:n_split + 1
 %         
 %     end
     % format
-    subplot(1, lenp, i)
+    subplot(2, lenp, i)
     xlabel('time from stimulus onset')
     ylabel(paramnames{i})
+    set(gca, 'box', 'off', 'tickdir', 'out')
+    subplot(2, lenp, i+2)
+    xlabel('stimulus')
+    ylabel('a.u.')
     set(gca, 'box', 'off', 'tickdir', 'out')
 end
 
