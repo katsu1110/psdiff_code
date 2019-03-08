@@ -18,6 +18,7 @@ end
 % path of analysis scripts
 addpath(genpath([mypath 'Katsuhisa/HNlab_meta']))
 addpath(genpath([mypath 'Katsuhisa/code/integrated/matlab_usefulfunc']))
+addpath(genpath([mypath 'Katsuhisa/serotonin_project/chronux_2_12/chronux_2_12']))
 
 % load list of sessions
 % list = listMaker({'kiwi', 'kaki', 'mango'});

@@ -36,17 +36,34 @@ ntr = size(eyep, 1);
 out = run_fit_routine(behmat, eyep, stmmat, disval);
 
 % store trial matrix =============================
-out.mat = [behmat, zeros(ntr, 2)];
+out.mat = [behmat, zeros(ntr, 4)];
 ncol = size(behmat, 2);
+params = define_params;
 for n = 1:ntr
     % pupil size
-    [minima, mini] = nanmin(eyep(n, :));
-    maxima = nanmax(eyep(n, mini+1:end));
+    [minima, mini] = min(eyep(n, :));
+    maxima = max(eyep(n, mini+1:end));
     out.mat(n, ncol+1) = maxima - minima;
     
     % pupil derivative
-    out.mat(n, ncol+2) = nanmax(diff(eyep(n, :)));
+    dps = diff(eyep(n, :));
+    out.mat(n, ncol+2) = max(dps);
+    
+    % pupil spectrum
+    dps = dps - nanmean(dps);
+    if n==1
+        [out.pupilpow.S, out.pupilpow.f] = mtspectrumc(dps',  params); 
+        frange = out.pupilpow.f >= 3 & out.pupilpow.f <= 10;
+        [out.mat(n, ncol+3), idx] = max(out.pupilpow.S(frange));
+    else
+        s = mtspectrumc(dps',  params);
+        [out.mat(n, ncol+3), idx] = max(s(frange));
+        out.pupilpow.S = out.pupilpow.S + s;
+    end    
+    ff = out.pupilpow.f(frange);
+    out.mat(n, ncol+4) = ff(idx);
 end
+out.pupilpow.S = out.pupilpow.S/ntr;
 
 % available reward size ==========================
 avrew = behmat(:, 14);
@@ -99,6 +116,7 @@ if sesinfo == 1
     out.refreshRate = ex.setup.refreshRate;
     out.stmdur = round(100*size(stmmat, 2)/ex.setup.refreshRate)/100;
     out.ntr = ntr; out.hdx_range = disval'; out.exp = {ex.exp.e1, ex.exp.e2};
+    out.stmmat = stmmat;
 end
 
 function out = run_fit_routine(behmat, eyep, stmseq, disval)
@@ -145,3 +163,11 @@ for r = 1:ntr
 end
 % compute PK for 0% stimulus
 pk = nanmean(svmat(ch==1,:)) - nanmean(svmat(ch==0,:));
+
+function params = define_params
+params.tapers = [2, 3]; % was [2, 3]. Chalk et al.,2010 used [3,5]
+params.err = 0;
+params.Fs = 500;
+params.fpass = [0.01 100];
+params.pad = 0; % nearest 2^N
+params.trialave = 1; % if 0, the file is too heavy
